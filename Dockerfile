@@ -27,6 +27,7 @@ RUN npm install -g \
     "@google/gemini-cli@${GEMINI_CLI_VERSION}" \
     "opencode-ai@${OPENCODE_VERSION}" \
     && npm cache clean --force
+RUN mkdir -p /root/.weclaw /root/.gemini
 COPY --from=builder /usr/local/bin/weclaw /usr/local/bin/weclaw
 
 VOLUME /root/.weclaw
