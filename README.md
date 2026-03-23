@@ -171,30 +171,62 @@ sudo systemctl enable --now weclaw
 docker build -t weclaw .
 
 # Included tools
-docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
+docker run --rm --entrypoint sh weclaw -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
 
 # Login (interactive — scan QR code)
-docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
+docker run --rm -it \
+  -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
+  weclaw login
 
-# If you use Gemini in-container, also persist its config
-docker run -it -v ~/.weclaw:/root/.weclaw -v ~/.gemini:/root/.gemini weclaw start
+# Foreground mode with persisted WeClaw + Gemini state
+docker run --rm -it \
+  -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
+  weclaw start
 
-# Start with HTTP agent
+# Background mode with HTTP agent fallback
 docker run -d --name weclaw \
   -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
   -e OPENCLAW_GATEWAY_URL=https://api.example.com \
   -e OPENCLAW_GATEWAY_TOKEN=sk-xxx \
   weclaw
 
 # View logs
 docker logs -f weclaw
+
+# Stop and remove the container
+docker rm -f weclaw
+```
+
+`docker-compose.example.yml` includes the same persistent volume mounts and
+optional OpenClaw gateway environment variables:
+
+```bash
+# Copy the example file, then edit env vars if you use OpenClaw HTTP fallback
+cp docker-compose.example.yml docker-compose.yml
+
+# Login once to create ~/.weclaw/config.json
+docker compose run --rm weclaw login
+
+# Start in the background
+docker compose up -d
+
+# View logs
+docker compose logs -f weclaw
+
+# Stop the service
+docker compose down
 ```
 
 > The published Docker image includes `weclaw`, `claude`, `codex`, `gemini`,
 > and `opencode`. Agents that need other binaries or services, such as Cursor,
 > Kimi, or OpenClaw gateway mode, still need to be mounted or configured
 > separately. The image also declares `/root/.gemini` as a volume so Gemini CLI
-> state can be persisted when needed.
+> state can be persisted when needed. The Dockerfile installs the bundled CLIs
+> in parallel build stages and drops npm from the final runtime image to keep
+> rebuilds faster and the published image smaller.
 
 ## Release
 

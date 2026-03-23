@@ -1,0 +1,13 @@
+services:
+  weclaw:
+    image: ghcr.io/fastclaw-ai/weclaw:latest
+    container_name: weclaw
+    restart: unless-stopped
+    command: start
+    volumes:
+      - ${HOME}/.weclaw:/root/.weclaw
+      - ${HOME}/.gemini:/root/.gemini
+    environment:
+      OPENCLAW_GATEWAY_URL: ${OPENCLAW_GATEWAY_URL:-}
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      OPENCLAW_GATEWAY_PASSWORD: ${OPENCLAW_GATEWAY_PASSWORD:-}
