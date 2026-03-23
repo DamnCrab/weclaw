@@ -9,6 +9,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w -X github.com/fastclaw-ai/weclaw/cmd.
 
 FROM node:20-bookworm-slim
 
+# Pin CLI versions for reproducible image builds. Update these ARG defaults
+# when intentionally upgrading bundled tools.
 ARG CLAUDE_CODE_VERSION=2.1.81
 ARG CODEX_VERSION=0.116.0
 ARG GEMINI_CLI_VERSION=0.34.0
