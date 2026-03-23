@@ -170,6 +170,9 @@ sudo systemctl enable --now weclaw
 # Build
 docker build -t weclaw .
 
+# Included tools
+docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
+
 # Login (interactive — scan QR code)
 docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
 
@@ -184,9 +187,10 @@ docker run -d --name weclaw \
 docker logs -f weclaw
 ```
 
-> Note: ACP and CLI agents require the agent binary inside the container.
-> The Docker image ships only WeClaw itself. For ACP/CLI agents, mount
-> the binary or build a custom image. HTTP agents work out of the box.
+> The published Docker image includes `weclaw`, `claude`, `codex`, `gemini`,
+> and `opencode`. Agents that need other binaries or services, such as Cursor,
+> Kimi, or OpenClaw gateway mode, still need to be mounted or configured
+> separately.
 
 ## Release
 
@@ -196,7 +200,9 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The workflow builds binaries for `darwin/linux` x `amd64/arm64`, creates a GitHub Release, and uploads all artifacts with checksums.
+The release workflow builds binaries for `darwin/linux` x `amd64/arm64`, creates a GitHub Release, and uploads all artifacts with checksums.
+The Docker workflow builds a multi-arch GHCR image that includes `weclaw`,
+`claude`, `codex`, `gemini`, and `opencode`.
 
 ## Development
 

@@ -170,6 +170,9 @@ sudo systemctl enable --now weclaw
 # 构建
 docker build -t weclaw .
 
+# 镜像内置工具
+docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
+
 # 登录（交互式，扫描二维码）
 docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
 
@@ -184,9 +187,9 @@ docker run -d --name weclaw \
 docker logs -f weclaw
 ```
 
-> 注意：ACP 和 CLI 模式需要容器内有对应的 Agent 二进制文件。
-> 默认镜像只包含 WeClaw 本体。如需使用 ACP/CLI Agent，请挂载二进制文件或构建自定义镜像。
-> HTTP 模式开箱即用。
+> 发布的 Docker 镜像内置了 `weclaw`、`claude`、`codex`、`gemini`、
+> `opencode`。像 Cursor、Kimi、以及 OpenClaw gateway 这类仍需额外二进制
+> 或外部服务的 Agent，仍需要自行挂载或额外配置。
 
 ## 发版
 
@@ -197,6 +200,8 @@ git push origin v0.1.0
 ```
 
 自动构建 `darwin/linux` x `amd64/arm64` 四个平台的二进制，创建 GitHub Release 并上传所有产物和校验文件。
+同时会构建一个包含 `weclaw`、`claude`、`codex`、`gemini`、`opencode`
+的多架构 GHCR Docker 镜像。
 
 ## 开发
 
