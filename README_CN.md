@@ -176,6 +176,9 @@ docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --ver
 # 登录（交互式，扫描二维码）
 docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
 
+# 如果容器内使用 Gemini，也建议持久化它的配置目录
+docker run -it -v ~/.weclaw:/root/.weclaw -v ~/.gemini:/root/.gemini weclaw start
+
 # 使用 HTTP Agent 启动
 docker run -d --name weclaw \
   -v ~/.weclaw:/root/.weclaw \
@@ -189,7 +192,8 @@ docker logs -f weclaw
 
 > 发布的 Docker 镜像内置了 `weclaw`、`claude`、`codex`、`gemini`、
 > `opencode`。像 Cursor、Kimi、以及 OpenClaw gateway 这类仍需额外二进制
-> 或外部服务的 Agent，仍需要自行挂载或额外配置。
+> 或外部服务的 Agent，仍需要自行挂载或额外配置。镜像也声明了
+> `/root/.gemini` volume，便于按需持久化 Gemini CLI 状态。
 
 ## 发版
 

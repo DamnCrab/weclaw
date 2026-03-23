@@ -176,6 +176,9 @@ docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --ver
 # Login (interactive — scan QR code)
 docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
 
+# If you use Gemini in-container, also persist its config
+docker run -it -v ~/.weclaw:/root/.weclaw -v ~/.gemini:/root/.gemini weclaw start
+
 # Start with HTTP agent
 docker run -d --name weclaw \
   -v ~/.weclaw:/root/.weclaw \
@@ -190,7 +193,8 @@ docker logs -f weclaw
 > The published Docker image includes `weclaw`, `claude`, `codex`, `gemini`,
 > and `opencode`. Agents that need other binaries or services, such as Cursor,
 > Kimi, or OpenClaw gateway mode, still need to be mounted or configured
-> separately.
+> separately. The image also declares `/root/.gemini` as a volume so Gemini CLI
+> state can be persisted when needed.
 
 ## Release
 

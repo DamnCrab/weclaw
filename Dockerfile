@@ -30,6 +30,6 @@ RUN npm install -g \
 RUN mkdir -p /root/.weclaw /root/.gemini
 COPY --from=builder /usr/local/bin/weclaw /usr/local/bin/weclaw
 
-VOLUME /root/.weclaw
+VOLUME ["/root/.weclaw", "/root/.gemini"]
 ENTRYPOINT ["weclaw"]
 CMD ["start"]
