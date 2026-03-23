@@ -169,10 +169,7 @@ func (a *CLIAgent) chatClaude(ctx context.Context, conversationID string, messag
 
 // chatCodex handles codex CLI invocation using "codex exec".
 func (a *CLIAgent) chatCodex(ctx context.Context, message string) (string, error) {
-	args := []string{"exec", message}
-	if a.model != "" {
-		args = append(args, "--model", a.model)
-	}
+	args := a.codexExecArgs(message)
 
 	log.Printf("[cli] running codex exec (command=%s)", a.command)
 	cmd := exec.CommandContext(ctx, a.command, args...)
@@ -193,4 +190,12 @@ func (a *CLIAgent) chatCodex(ctx context.Context, message string) (string, error
 		return "", fmt.Errorf("codex returned empty response")
 	}
 	return result, nil
+}
+
+func (a *CLIAgent) codexExecArgs(message string) []string {
+	args := []string{"exec", "--skip-git-repo-check", message}
+	if a.model != "" {
+		args = append(args, "--model", a.model)
+	}
+	return args
 }
