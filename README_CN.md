@@ -201,11 +201,17 @@ docker rm -f weclaw
 ```
 
 `docker-compose.example.yml` 也提供了同样的持久化目录和可选的
-OpenClaw gateway 环境变量：
+OpenClaw gateway 环境变量。默认会把状态保存在当前目录的 `./.weclaw`
+和 `./.gemini`；如果你想改成 `~/.weclaw` 这类绝对路径，可以设置
+`WECLAW_CONFIG_DIR` / `GEMINI_CONFIG_DIR`：
 
 ```bash
 # 复制示例文件；如果你使用 OpenClaw HTTP 回退，再按需填写环境变量
 cp docker-compose.example.yml docker-compose.yml
+
+# 可选：把状态目录改到 home 目录，而不是仓库当前目录
+export WECLAW_CONFIG_DIR="$HOME/.weclaw"
+export GEMINI_CONFIG_DIR="$HOME/.gemini"
 
 # 先登录一次，生成 ~/.weclaw/config.json
 docker compose run --rm weclaw login

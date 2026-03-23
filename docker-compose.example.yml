@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     command: start
     volumes:
-      - ${HOME}/.weclaw:/root/.weclaw
-      - ${HOME}/.gemini:/root/.gemini
+      - ${WECLAW_CONFIG_DIR:-./.weclaw}:/root/.weclaw
+      - ${GEMINI_CONFIG_DIR:-./.gemini}:/root/.gemini
     environment:
       OPENCLAW_GATEWAY_URL: ${OPENCLAW_GATEWAY_URL:-}
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}

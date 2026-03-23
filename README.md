@@ -201,11 +201,17 @@ docker rm -f weclaw
 ```
 
 `docker-compose.example.yml` includes the same persistent volume mounts and
-optional OpenClaw gateway environment variables:
+optional OpenClaw gateway environment variables. By default it stores state in
+`./.weclaw` and `./.gemini`; set `WECLAW_CONFIG_DIR` / `GEMINI_CONFIG_DIR` if
+you prefer absolute host paths such as `~/.weclaw`:
 
 ```bash
 # Copy the example file, then edit env vars if you use OpenClaw HTTP fallback
 cp docker-compose.example.yml docker-compose.yml
+
+# Optional: keep state in your home directory instead of the repo folder
+export WECLAW_CONFIG_DIR="$HOME/.weclaw"
+export GEMINI_CONFIG_DIR="$HOME/.gemini"
 
 # Login once to create ~/.weclaw/config.json
 docker compose run --rm weclaw login
