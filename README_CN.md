@@ -171,29 +171,66 @@ sudo systemctl enable --now weclaw
 docker build -t weclaw .
 
 # 镜像内置工具
-docker run --rm weclaw sh -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
+docker run --rm --entrypoint sh weclaw -lc 'weclaw version && claude --version && codex --version && gemini --version && opencode --version'
 
 # 登录（交互式，扫描二维码）
-docker run -it -v ~/.weclaw:/root/.weclaw weclaw login
+docker run --rm -it \
+  -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
+  weclaw login
 
-# 如果容器内使用 Gemini，也建议持久化它的配置目录
-docker run -it -v ~/.weclaw:/root/.weclaw -v ~/.gemini:/root/.gemini weclaw start
+# 前台运行，并持久化 WeClaw 和 Gemini 状态
+docker run --rm -it \
+  -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
+  weclaw start
 
-# 使用 HTTP Agent 启动
+# 使用 HTTP Agent 回退并后台运行
 docker run -d --name weclaw \
   -v ~/.weclaw:/root/.weclaw \
+  -v ~/.gemini:/root/.gemini \
   -e OPENCLAW_GATEWAY_URL=https://api.example.com \
   -e OPENCLAW_GATEWAY_TOKEN=sk-xxx \
   weclaw
 
 # 查看日志
 docker logs -f weclaw
+
+# 停止并删除容器
+docker rm -f weclaw
+```
+
+`docker-compose.example.yml` 也提供了同样的持久化目录和可选的
+OpenClaw gateway 环境变量。默认会把状态保存在当前目录的 `./.weclaw`
+和 `./.gemini`；如果你想改成 `~/.weclaw` 这类绝对路径，可以设置
+`WECLAW_CONFIG_DIR` / `GEMINI_CONFIG_DIR`：
+
+```bash
+# 复制示例文件；如果你使用 OpenClaw HTTP 回退，再按需填写环境变量
+cp docker-compose.example.yml docker-compose.yml
+
+# 可选：把状态目录改到 home 目录，而不是仓库当前目录
+export WECLAW_CONFIG_DIR="$HOME/.weclaw"
+export GEMINI_CONFIG_DIR="$HOME/.gemini"
+
+# 先登录一次，生成 ~/.weclaw/config.json
+docker compose run --rm weclaw login
+
+# 后台启动
+docker compose up -d
+
+# 查看日志
+docker compose logs -f weclaw
+
+# 停止服务
+docker compose down
 ```
 
 > 发布的 Docker 镜像内置了 `weclaw`、`claude`、`codex`、`gemini`、
 > `opencode`。像 Cursor、Kimi、以及 OpenClaw gateway 这类仍需额外二进制
 > 或外部服务的 Agent，仍需要自行挂载或额外配置。镜像也声明了
-> `/root/.gemini` volume，便于按需持久化 Gemini CLI 状态。
+> `/root/.gemini` volume，便于按需持久化 Gemini CLI 状态。Dockerfile 现在会
+> 在并行构建阶段安装内置 CLI，并在最终运行时镜像中移除 npm，以缩短构建时间并减小镜像体积。
 
 ## 发版
 
