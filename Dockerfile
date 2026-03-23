@@ -1,16 +1,37 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.24-bookworm AS builder
 
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /usr/local/bin/weclaw .
+ARG VERSION=dev
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -X github.com/fastclaw-ai/weclaw/cmd.Version=${VERSION}" -o /usr/local/bin/weclaw .
 
-FROM alpine:3.21
+FROM node:20-bookworm-slim
 
-RUN apk add --no-cache ca-certificates tzdata
+# Pin CLI versions for reproducible image builds. Update these ARG defaults
+# when intentionally upgrading bundled tools.
+ARG CLAUDE_CODE_VERSION=2.1.81
+ARG CODEX_VERSION=0.116.0
+ARG GEMINI_CLI_VERSION=0.34.0
+ARG OPENCODE_VERSION=1.3.0
+
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_FUND=false \
+    NODE_ENV=production
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+RUN npm install -g \
+    "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+    "@openai/codex@${CODEX_VERSION}" \
+    "@google/gemini-cli@${GEMINI_CLI_VERSION}" \
+    "opencode-ai@${OPENCODE_VERSION}" \
+    && npm cache clean --force
+RUN mkdir -p /root/.weclaw /root/.gemini
 COPY --from=builder /usr/local/bin/weclaw /usr/local/bin/weclaw
 
-VOLUME /root/.weclaw
+VOLUME ["/root/.weclaw", "/root/.gemini"]
 ENTRYPOINT ["weclaw"]
 CMD ["start"]
